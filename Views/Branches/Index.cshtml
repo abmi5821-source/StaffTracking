@@ -1,0 +1,26 @@
+@model List<Branch>
+@{ var regions = (List<Region>)ViewBag.Regions; var names = (Dictionary<int, string>)ViewBag.Names; bool isDept = User.IsInRole("DeptManager"); }
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">الفروع (@Model.Count)</h4>
+  <div class="d-flex gap-2">
+    @if (isDept)
+    {
+      <form method="get"><select name="regionId" class="form-select" onchange="this.form.submit()">
+        <option value="">كل المندوبيات</option>
+        @foreach (var r in regions) { <option value="@r.RegionId" selected="@((int?)ViewBag.Selected == r.RegionId)">@r.Name</option> }
+      </select></form>
+    }
+    <a class="btn btn-outline-primary" asp-action="Bulk">إضافة دفعة فروع</a>
+    <a class="btn btn-primary" asp-action="Create">+ فرع</a>
+  </div>
+</div>
+<table class="table table-bordered bg-white">
+  <thead class="table-dark"><tr><th>الفرع</th><th>الرمز</th><th>المندوبية</th><th>الحالة</th><th></th></tr></thead>
+  <tbody>
+  @foreach (var b in Model)
+  {
+    <tr><td>@b.Name</td><td>@b.Code</td><td>@names[b.RegionId]</td><td>@(b.IsActive ? "فعّال" : "موقوف")</td>
+    <td><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@b.BranchId">تعديل</a></td></tr>
+  }
+  </tbody>
+</table>

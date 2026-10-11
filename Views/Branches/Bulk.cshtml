@@ -1,0 +1,10 @@
+@{ var regions = (List<Region>)ViewBag.Regions; }
+<h4 class="mb-3">إضافة دفعة فروع</h4>
+<div class="card" style="max-width:600px"><div class="card-body">
+<form method="post">
+  <div class="mb-3"><label class="form-label">المندوبية</label>
+    <select name="regionId" asp-items="@(new SelectList(regions, "RegionId", "Name"))" class="form-select"></select></div>
+  <div class="mb-3"><label class="form-label">أسماء الفروع (اسم فرع في كل سطر، يمكنك لصقها من Excel)</label>
+    <textarea name="names" rows="12" class="form-control"></textarea></div>
+  <button class="btn btn-primary">إضافة</button> <a class="btn btn-link" asp-action="Index">رجوع</a>
+</form></div></div>

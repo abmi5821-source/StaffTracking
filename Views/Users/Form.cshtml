@@ -1,0 +1,16 @@
+@model AppUser
+@{ var regions = (List<Region>)ViewBag.Regions; bool isNew = Model.UserId == 0; }
+<h4 class="mb-3">@(isNew ? "مستخدم جديد" : "تعديل مستخدم")</h4>
+<div class="card" style="max-width:520px"><div class="card-body">
+<form method="post">
+  <div asp-validation-summary="All" class="alert alert-danger py-2"></div>
+  <div class="mb-3"><label class="form-label">اسم المستخدم</label><input asp-for="UserName" class="form-control" /></div>
+  <div class="mb-3"><label class="form-label">الاسم الكامل</label><input asp-for="FullName" class="form-control" /></div>
+  <div class="mb-3"><label class="form-label">الصلاحية</label>
+    <select asp-for="Role" class="form-select"><option value="RegionManager">مدير مندوبية</option><option value="DeptManager">مدير القسم</option></select></div>
+  <div class="mb-3"><label class="form-label">المندوبية (لمدير المندوبية)</label>
+    <select asp-for="RegionId" asp-items="@(new SelectList(regions, "RegionId", "Name"))" class="form-select"><option value="">— بدون —</option></select></div>
+  <div class="mb-3"><label class="form-label">@(isNew ? "كلمة السر" : "كلمة سر جديدة (اتركها فارغة لعدم التغيير)")</label><input name="password" type="password" class="form-control" autocomplete="new-password" /></div>
+  <div class="form-check mb-3"><input asp-for="IsActive" class="form-check-input" /><label class="form-check-label">الحساب فعّال</label></div>
+  <button class="btn btn-primary">حفظ</button> <a class="btn btn-link" asp-action="Index">رجوع</a>
+</form></div></div>

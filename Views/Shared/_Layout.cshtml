@@ -12,6 +12,14 @@
       <a class="navbar-brand" href="/">منصة متابعة موظفي الفروع</a>
       @if (User.Identity.IsAuthenticated)
       {
+        <div class="me-auto ms-4 d-flex gap-3">
+          <a class="nav-link text-white" href="/">لوحة التحكم</a>
+          <a class="nav-link text-white" href="/Branches">الفروع</a>
+          @if (User.IsInRole("DeptManager")) { <a class="nav-link text-white" href="/Users">المستخدمون</a> }
+        </div>
+      }
+      @if (User.Identity.IsAuthenticated)
+      {
         <form method="post" asp-controller="Account" asp-action="Logout" class="d-flex align-items-center gap-3">
           <span class="text-white">@User.Identity.Name</span>
           <button class="btn btn-outline-light btn-sm">تسجيل الخروج</button>
