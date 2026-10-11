@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 namespace StaffTracking.Models;
 
 public class Region { public int RegionId { get; set; } public string Name { get; set; } }
@@ -13,7 +14,7 @@ public class Branch
 
 public class AppUser
 {
-    public int UserId { get; set; }
+    [Key] public int UserId { get; set; }
     public string UserName { get; set; }
     public string PasswordHash { get; set; }
     public string FullName { get; set; }
