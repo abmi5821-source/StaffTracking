@@ -7,7 +7,6 @@ using StaffTracking.Models;
 namespace StaffTracking.Controllers;
 
 [Authorize]
-[HttpPost]
 public class RecordsController : Controller
 {
     private readonly AppDbContext _db;
@@ -21,6 +20,7 @@ public class RecordsController : Controller
     }
     private IActionResult Back(int id) => RedirectToAction("Details", "Employees", new { id });
 
+    [HttpPost]
     public IActionResult AddLeave(int employeeId, DateTime startDate, DateTime endDate, string leaveType, string notes)
     {
         if (!Can(employeeId)) return NotFound();
@@ -29,6 +29,7 @@ public class RecordsController : Controller
         _db.SaveChanges(); return Back(employeeId);
     }
 
+    [HttpPost]
     public IActionResult AddDisc(int employeeId, string kind, DateTime issueDate, string reason, string bookNumber)
     {
         if (!Can(employeeId)) return NotFound();
@@ -37,6 +38,7 @@ public class RecordsController : Controller
         _db.SaveChanges(); return Back(employeeId);
     }
 
+    [HttpPost]
     public IActionResult AddCourse(int employeeId, string title, string scope, string country, DateTime? startDate, DateTime? endDate)
     {
         if (!Can(employeeId)) return NotFound();
@@ -45,6 +47,7 @@ public class RecordsController : Controller
         _db.SaveChanges(); return Back(employeeId);
     }
 
+    [HttpPost]
     public IActionResult Delete(string kind, int id)
     {
         int empId; 
