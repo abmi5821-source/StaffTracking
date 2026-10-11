@@ -1,0 +1,30 @@
+@model List<EmpRow>
+@{ var regions = (List<Region>)ViewBag.Regions; bool isDept = User.IsInRole("DeptManager"); }
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h4 class="mb-0">الموظفون (@Model.Count)</h4>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2">
+      @if (isDept)
+      {
+        <select name="regionId" class="form-select" onchange="this.form.submit()"><option value="">كل المندوبيات</option>
+        @foreach (var r in regions) { <option value="@r.RegionId" selected="@((int?)ViewBag.SelRegion == r.RegionId)">@r.Name</option> }</select>
+      }
+      <input name="q" value="@ViewBag.Q" class="form-control" placeholder="بحث باسم الموظف أو الفرع" />
+      <button class="btn btn-outline-secondary">بحث</button>
+    </form>
+    <a class="btn btn-primary" asp-action="Create">+ موظف</a>
+  </div>
+</div>
+<div class="table-responsive"><table class="table table-bordered table-hover bg-white align-middle">
+  <thead class="table-dark"><tr><th>الموظف</th><th>النوع</th><th>الفرع</th><th>المندوبية</th><th>إجازات السنة</th><th>تنبيهات</th><th>عقوبات</th><th>دورات محلية</th><th>دورات دولية</th></tr></thead>
+  <tbody>
+  @foreach (var e in Model)
+  {
+    <tr class="@(e.IsActive ? "" : "table-secondary")">
+      <td><a asp-action="Details" asp-route-id="@e.EmployeeId">@e.FullName</a></td>
+      <td>@(e.EmpType == "Primary" ? "أصيل" : "بديل")</td><td>@e.Branch</td><td>@e.Region</td>
+      <td>@e.LeavesYear</td><td>@e.Warnings</td><td>@e.Penalties</td><td>@e.LocalCourses</td><td>@e.IntlCourses</td>
+    </tr>
+  }
+  </tbody>
+</table></div>

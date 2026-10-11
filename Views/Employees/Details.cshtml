@@ -1,0 +1,74 @@
+@model EmpDetailsVm
+@section Scripts {
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script>
+    const months = ["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+    new Chart(document.getElementById('c1'), { type: 'bar', data: { labels: months, datasets: [
+      { label: 'عدد الإجازات', data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyLeaves)), backgroundColor: '#0d6efd' },
+      { label: 'عدد الأيام', data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyDays)), backgroundColor: '#adb5bd' }] },
+      options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+    new Chart(document.getElementById('c2'), { type: 'doughnut', data: { labels: ['تنبيهات','عقوبات','دورات محلية','دورات دولية'],
+      datasets: [{ data: [@Model.Warnings, @Model.Penalties, @Model.Local, @Model.Intl], backgroundColor: ['#ffc107','#dc3545','#198754','#0dcaf0'] }] } });
+  </script>
+}
+@{ var e = Model.Emp; }
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+  <div><h4 class="mb-1">@e.FullName <span class="badge bg-@(e.EmpType == "Primary" ? "primary" : "secondary")">@(e.EmpType == "Primary" ? "أصيل" : "بديل")</span>
+    @if (!e.IsActive) { <span class="badge bg-dark">غير فعّال</span> }</h4>
+    <div class="text-muted">@Model.Branch — @Model.Region @(string.IsNullOrEmpty(e.EmployeeNumber) ? "" : "— رقم وظيفي " + e.EmployeeNumber) @(string.IsNullOrEmpty(e.Phone) ? "" : "— " + e.Phone)</div></div>
+  <div><a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@e.EmployeeId">تعديل</a> <a class="btn btn-link" asp-action="Index">رجوع</a></div>
+</div>
+@if (TempData["Err"] != null) { <div class="alert alert-danger">@TempData["Err"]</div> }
+
+<div class="row row-cols-2 row-cols-md-4 row-cols-lg-7 g-2 mb-4 text-center">
+  @foreach (var c in new[] { ("إجازات آخر 7 أيام", Model.Week, "primary"), ("إجازات الشهر", Model.Month, "primary"), ("إجازات السنة", Model.Year, "primary"),
+    ("تنبيهات", Model.Warnings, "warning"), ("عقوبات", Model.Penalties, "danger"), ("دورات محلية", Model.Local, "success"), ("دورات دولية", Model.Intl, "info") })
+  { <div class="col"><div class="card border-@c.Item3"><div class="card-body py-2"><div class="fs-3 fw-bold">@c.Item2</div><div class="small">@c.Item1</div></div></div></div> }
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-8"><div class="card"><div class="card-body">
+    <div class="d-flex justify-content-between"><h6>الإجازات الشهرية لسنة @Model.ChartYear</h6>
+      <div><a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@e.EmployeeId" asp-route-year="@(Model.ChartYear - 1)">السنة السابقة</a>
+           <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@e.EmployeeId" asp-route-year="@(Model.ChartYear + 1)">السنة التالية</a></div></div>
+    <canvas id="c1" height="120"></canvas></div></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-body"><h6>حالة الموظف</h6><canvas id="c2"></canvas></div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4"><div class="card"><div class="card-header">+ إجازة</div><div class="card-body">
+    <form method="post" asp-controller="Records" asp-action="AddLeave"><input type="hidden" name="employeeId" value="@e.EmployeeId" />
+      <div class="row"><div class="col mb-2"><label class="small">من</label><input type="date" name="startDate" class="form-control" required /></div>
+      <div class="col mb-2"><label class="small">إلى</label><input type="date" name="endDate" class="form-control" required /></div></div>
+      <input name="leaveType" class="form-control mb-2" placeholder="النوع (اعتيادية، مرضية ...)" />
+      <input name="notes" class="form-control mb-2" placeholder="ملاحظات" />
+      <button class="btn btn-primary btn-sm">حفظ</button></form></div></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-header">+ تنبيه / عقوبة</div><div class="card-body">
+    <form method="post" asp-controller="Records" asp-action="AddDisc"><input type="hidden" name="employeeId" value="@e.EmployeeId" />
+      <select name="kind" class="form-select mb-2"><option value="Warning">تنبيه</option><option value="Penalty">عقوبة</option></select>
+      <input type="date" name="issueDate" class="form-control mb-2" required />
+      <input name="reason" class="form-control mb-2" placeholder="السبب" required />
+      <input name="bookNumber" class="form-control mb-2" placeholder="رقم الكتاب" />
+      <button class="btn btn-primary btn-sm">حفظ</button></form></div></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-header">+ دورة</div><div class="card-body">
+    <form method="post" asp-controller="Records" asp-action="AddCourse"><input type="hidden" name="employeeId" value="@e.EmployeeId" />
+      <input name="title" class="form-control mb-2" placeholder="اسم الدورة" required />
+      <div class="row"><div class="col mb-2"><select name="scope" class="form-select"><option value="Local">محلية</option><option value="International">دولية</option></select></div>
+      <div class="col mb-2"><input name="country" class="form-control" placeholder="البلد" /></div></div>
+      <div class="row"><div class="col mb-2"><input type="date" name="startDate" class="form-control" /></div>
+      <div class="col mb-2"><input type="date" name="endDate" class="form-control" /></div></div>
+      <button class="btn btn-primary btn-sm">حفظ</button></form></div></div></div>
+</div>
+
+<h5>المراحل الزمنية</h5>
+<ul class="list-group mb-5">
+  @foreach (var t in Model.Timeline)
+  {
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div><span class="badge bg-@t.Color me-2">@t.Type</span><strong>@t.Date.ToString("yyyy-MM-dd")</strong> — @t.Title <span class="text-muted small">@t.Detail</span></div>
+      <form method="post" asp-controller="Records" asp-action="Delete" onsubmit="return confirm('حذف هذا السجل؟')">
+        <input type="hidden" name="kind" value="@t.Kind" /><input type="hidden" name="id" value="@t.Id" /><button class="btn btn-sm btn-outline-danger">حذف</button></form>
+    </li>
+  }
+  @if (!Model.Timeline.Any()) { <li class="list-group-item text-muted">لا توجد سجلات بعد.</li> }
+</ul>

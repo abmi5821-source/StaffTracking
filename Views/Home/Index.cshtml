@@ -1,8 +1,12 @@
 @model List<RegionStat>
 <h4 class="mb-3">لوحة التحكم</h4>
-<table class="table table-bordered bg-white">
-  <thead class="table-dark"><tr><th>المندوبية</th><th>عدد الفروع</th><th>عدد الموظفين</th></tr></thead>
+<div class="table-responsive"><table class="table table-bordered bg-white text-center align-middle">
+  <thead class="table-dark"><tr><th class="text-start">المندوبية</th><th>الفروع</th><th>الموظفون</th><th>إجازات السنة</th><th>تنبيهات</th><th>عقوبات</th><th>دورات محلية</th><th>دورات دولية</th></tr></thead>
   <tbody>
-  @foreach (var r in Model) { <tr><td>@r.Name</td><td>@r.Branches</td><td>@r.Employees</td></tr> }
+  @foreach (var r in Model)
+  {
+    <tr><td class="text-start">@r.Name</td><td>@r.Branches</td><td>@r.Employees</td><td>@r.LeavesYear</td><td>@r.Warnings</td><td>@r.Penalties</td><td>@r.LocalCourses</td><td>@r.IntlCourses</td></tr>
+  }
+  <tr class="table-secondary fw-bold"><td class="text-start">المجموع</td><td>@Model.Sum(x => x.Branches)</td><td>@Model.Sum(x => x.Employees)</td><td>@Model.Sum(x => x.LeavesYear)</td><td>@Model.Sum(x => x.Warnings)</td><td>@Model.Sum(x => x.Penalties)</td><td>@Model.Sum(x => x.LocalCourses)</td><td>@Model.Sum(x => x.IntlCourses)</td></tr>
   </tbody>
-</table>
+</table></div>

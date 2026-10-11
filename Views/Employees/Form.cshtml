@@ -1,0 +1,15 @@
+@model Employee
+@{ var items = (List<SelectListItem>)ViewBag.BranchItems; bool isNew = Model.EmployeeId == 0; }
+<h4 class="mb-3">@(isNew ? "موظف جديد" : "تعديل موظف")</h4>
+<div class="card" style="max-width:560px"><div class="card-body">
+<form method="post">
+  <div asp-validation-summary="All" class="alert alert-danger py-2"></div>
+  <div class="mb-3"><label class="form-label">الفرع</label><select asp-for="BranchId" asp-items="items" class="form-select"></select></div>
+  <div class="mb-3"><label class="form-label">اسم الموظف</label><input asp-for="FullName" class="form-control" /></div>
+  <div class="mb-3"><label class="form-label">النوع</label>
+    <select asp-for="EmpType" class="form-select"><option value="Primary">أصيل</option><option value="Substitute">بديل</option></select></div>
+  <div class="row"><div class="col mb-3"><label class="form-label">الرقم الوظيفي</label><input asp-for="EmployeeNumber" class="form-control" /></div>
+  <div class="col mb-3"><label class="form-label">الهاتف</label><input asp-for="Phone" class="form-control" /></div></div>
+  <div class="form-check mb-3"><input asp-for="IsActive" class="form-check-input" /><label class="form-check-label">على رأس عمله (فعّال)</label></div>
+  <button class="btn btn-primary">حفظ</button> <a class="btn btn-link" asp-action="Index">رجوع</a>
+</form></div></div>

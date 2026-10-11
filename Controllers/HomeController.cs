@@ -14,18 +14,27 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var q = _db.Regions.AsQueryable();
-        if (User.IsInRole("RegionManager"))
-        {
-            var rid = int.Parse(User.FindFirstValue("RegionId"));
-            q = q.Where(r => r.RegionId == rid);   // مدير المندوبية يرى مندوبيته فقط
-        }
-        var rows = q.Select(r => new RegionStat
+        int? my = User.IsInRole("RegionManager") ? int.Parse(User.FindFirstValue("RegionId")) : (int?)null;
+        var regions = _db.Regions.Where(r => my == null || r.RegionId == my).OrderBy(r => r.RegionId).ToList();
+        var branches = _db.Branches.Where(b => b.IsActive).ToList();
+        var regionOfBranch = branches.ToDictionary(b => b.BranchId, b => b.RegionId);
+        var regionOfEmp = _db.Employees.Where(e => e.IsActive).ToList()
+            .Where(e => regionOfBranch.ContainsKey(e.BranchId)).ToDictionary(e => e.EmployeeId, e => regionOfBranch[e.BranchId]);
+        var yStart = new DateTime(DateTime.Today.Year, 1, 1);
+        var leaves = _db.Leaves.Where(l => l.StartDate >= yStart).Select(l => l.EmployeeId).ToList();
+        var disc = _db.Disciplinary.Select(d => new { d.EmployeeId, d.Kind }).ToList();
+        var crs = _db.Courses.Select(c => new { c.EmployeeId, c.Scope }).ToList();
+
+        var rows = regions.Select(r => new RegionStat
         {
             Name = r.Name,
-            Branches = _db.Branches.Count(b => b.RegionId == r.RegionId && b.IsActive),
-            Employees = _db.Employees.Count(e => e.IsActive &&
-                _db.Branches.Any(b => b.BranchId == e.BranchId && b.RegionId == r.RegionId))
+            Branches = branches.Count(b => b.RegionId == r.RegionId),
+            Employees = regionOfEmp.Count(x => x.Value == r.RegionId),
+            LeavesYear = leaves.Count(e => regionOfEmp.GetValueOrDefault(e) == r.RegionId),
+            Warnings = disc.Count(d => d.Kind == "Warning" && regionOfEmp.GetValueOrDefault(d.EmployeeId) == r.RegionId),
+            Penalties = disc.Count(d => d.Kind == "Penalty" && regionOfEmp.GetValueOrDefault(d.EmployeeId) == r.RegionId),
+            LocalCourses = crs.Count(c => c.Scope == "Local" && regionOfEmp.GetValueOrDefault(c.EmployeeId) == r.RegionId),
+            IntlCourses = crs.Count(c => c.Scope == "International" && regionOfEmp.GetValueOrDefault(c.EmployeeId) == r.RegionId)
         }).ToList();
         return View(rows);
     }

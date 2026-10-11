@@ -10,4 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<Branch> Branches { get; set; }
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Employee> Employees { get; set; }
+    public DbSet<Leave> Leaves { get; set; }
+    public DbSet<Disciplinary> Disciplinary { get; set; }
+    public DbSet<Course> Courses { get; set; }
 }

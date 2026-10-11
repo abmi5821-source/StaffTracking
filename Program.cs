@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using StaffTracking.Data;
 using StaffTracking.Models;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
@@ -40,7 +41,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (pg) db.Database.EnsureCreated();   // PostgreSQL: إنشاء الجداول تلقائيًا
+    if (pg)
+    {
+        db.Database.EnsureCreated();   // PostgreSQL: إنشاء الجداول تلقائيًا
+        // جداول أضيفت لاحقًا (لقواعد أنشئت قبل هذا الإصدار)
+        db.Database.ExecuteSqlRaw(@"
+CREATE TABLE IF NOT EXISTS ""Leaves"" (""LeaveId"" serial PRIMARY KEY, ""EmployeeId"" int NOT NULL, ""StartDate"" timestamp NOT NULL, ""EndDate"" timestamp NOT NULL, ""LeaveType"" text, ""Notes"" text, ""EnteredBy"" int NOT NULL, ""CreatedAt"" timestamp NOT NULL);
+CREATE TABLE IF NOT EXISTS ""Disciplinary"" (""DisciplinaryId"" serial PRIMARY KEY, ""EmployeeId"" int NOT NULL, ""Kind"" text NOT NULL, ""IssueDate"" timestamp NOT NULL, ""Reason"" text, ""BookNumber"" text, ""EnteredBy"" int NOT NULL, ""CreatedAt"" timestamp NOT NULL);
+CREATE TABLE IF NOT EXISTS ""Courses"" (""CourseId"" serial PRIMARY KEY, ""EmployeeId"" int NOT NULL, ""Title"" text NOT NULL, ""Scope"" text NOT NULL, ""Country"" text, ""StartDate"" timestamp, ""EndDate"" timestamp, ""EnteredBy"" int NOT NULL, ""CreatedAt"" timestamp NOT NULL);");
+    }
     if (!db.Regions.Any())
     {
         db.Regions.AddRange(new[] { "مندوبية الشمال", "مندوبية الوسط", "مندوبية الجنوب",

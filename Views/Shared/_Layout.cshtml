@@ -15,6 +15,7 @@
         <div class="me-auto ms-4 d-flex gap-3">
           <a class="nav-link text-white" href="/">لوحة التحكم</a>
           <a class="nav-link text-white" href="/Branches">الفروع</a>
+          <a class="nav-link text-white" href="/Employees">الموظفون</a>
           @if (User.IsInRole("DeptManager")) { <a class="nav-link text-white" href="/Users">المستخدمون</a> }
         </div>
       }
@@ -28,5 +29,6 @@
     </div>
   </nav>
   <div class="container">@RenderBody()</div>
+  @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
