@@ -1,0 +1,8 @@
+@model List<RegionStat>
+<h4 class="mb-3">لوحة التحكم</h4>
+<table class="table table-bordered bg-white">
+  <thead class="table-dark"><tr><th>المندوبية</th><th>عدد الفروع</th><th>عدد الموظفين</th></tr></thead>
+  <tbody>
+  @foreach (var r in Model) { <tr><td>@r.Name</td><td>@r.Branches</td><td>@r.Employees</td></tr> }
+  </tbody>
+</table>
